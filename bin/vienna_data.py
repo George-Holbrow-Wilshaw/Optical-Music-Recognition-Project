@@ -5,6 +5,9 @@ import numpy as np
 import os
 from pathlib import Path
 import tensorflow as tf
+import sys
+from sklearn.utils import shuffle
+from skimage import color
 
 def map_pitch(pitch):
     
@@ -31,12 +34,21 @@ def map_pitch(pitch):
 
 class ViennaNote:
     
-    def __init__(self, fn):
+    def __init__(self, fn, typ):
         attr = fn.split('-')
+        
+        if typ == 'test':
+            ROOT = './data/originals-test/'
+        elif typ == 'train':
+            ROOT = './data/originals-resized/'
+        else:
+            sys.exit()
+            
         self.type = attr[0]
         self.time = attr[1]
         self.pitch = attr[2]
-        self.image = imageio.imread('./data/originals-resized/' + fn)
+        imfile = imageio.imread(ROOT + fn)
+        self.image = color.rgb2gray(imfile) / 255
         
     def resize_image(self, width, height):
         pass
@@ -45,9 +57,9 @@ class InputData:
     
     ROOT = './data/originals-resized/' 
     
-    def __init__(self, path = ROOT):
+    def __init__(self, typ, path = ROOT):
         self.files = [file for file in os.listdir(path) if os.path.isfile(path + file) and file[0:4] == 'note']
-        self.objs = [ViennaNote(f) for f in self.files]
+        self.objs = [ViennaNote(f, typ) for f in self.files]
                 
     def training_images(self, path = ROOT):
         images = [o.image for o in self.objs]
