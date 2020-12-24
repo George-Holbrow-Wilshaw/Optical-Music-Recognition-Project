@@ -1,3 +1,5 @@
+import os
+import sys
 import tensorflow as tf
 import vienna_data
 from sklearn.utils import shuffle
