@@ -4,33 +4,9 @@ import re
 import numpy as np
 import os
 from pathlib import Path
-import tensorflow as tf
-import sys
-from sklearn.utils import shuffle
 from skimage import color
-
-def map_pitch(pitch):
-    
-    m = {"a": 0,
-         "h": 1,
-         "c1": 2,
-         "d1": 3,
-         "e1": 4,
-         "f1": 5,
-         "g1": 6,
-         "a1": 7,
-         "h1": 8,
-         "c2": 9,
-         "d2": 10,
-         "e2": 11,
-         "f2": 12,
-         "g2": 13,
-         "a2": 14,
-         "h2": 15,
-         "c3": 16,
-         "other": 17}
-    
-    return(m[pitch])
+import class_maps
+import sys
 
 class ViennaNote:
     
@@ -40,7 +16,7 @@ class ViennaNote:
         if typ == 'test':
             ROOT = './data/originals-test/'
         elif typ == 'train':
-            ROOT = './data/originals-resized/'
+            ROOT = './data/transformations-resized/'
         else:
             sys.exit()
             
@@ -55,15 +31,33 @@ class ViennaNote:
     
 class InputData:
     
-    ROOT = './data/originals-resized/' 
+    ROOT = './data/transformations-resized/' 
     
-    def __init__(self, typ, path = ROOT):
+    def __init__(self, path = ROOT):
         self.files = [file for file in os.listdir(path) if os.path.isfile(path + file) and file[0:4] == 'note']
-        self.objs = [ViennaNote(f, typ) for f in self.files]
+        self.objs = [ViennaNote(f, 'train') for f in self.files]
                 
     def training_images(self, path = ROOT):
         images = [o.image for o in self.objs]
-        return(np.array(images) / 255)
+        return(np.array(images))
+    
+    def training_labels_pitch(self, path = ROOT):
+        notes = [o.pitch for o in self.objs]
+        labels = [map_pitch(pitch) for pitch in notes]
+        return(np.array(labels))
+    
+    
+class TestData:
+    
+    ROOT = './data/originals-test/' 
+    
+    def __init__(self, path = ROOT):
+        self.files = [file for file in os.listdir(path) if os.path.isfile(path + file) and file[0:4] == 'note']
+        self.objs = [ViennaNote(f, 'test') for f in self.files]
+                
+    def training_images(self, path = ROOT):
+        images = [o.image for o in self.objs]
+        return(np.array(images))
     
     def training_labels(self, path = ROOT):
         notes = [o.pitch for o in self.objs]
