@@ -133,3 +133,4 @@ dmypy.json
 /data
 .DS_store
 /ckpts
+__pycache__
